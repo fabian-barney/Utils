@@ -178,14 +178,14 @@ public enum ByteUnit {
 	static final double safeMulti(double d, double multi) {
 		double limit = MAX / multi;
 
-        if (d >  limit) {
-					return Double.MAX_VALUE;
-				}
-        if (d < -limit) {
-					return Double.MIN_VALUE;
-				}
+		if (d >  limit) {
+			return Double.MAX_VALUE;
+		}
+		if (d < -limit) {
+			return Double.MIN_VALUE;
+		}
 
-        return d * multi;
+		return d * multi;
 	}
 
 	
