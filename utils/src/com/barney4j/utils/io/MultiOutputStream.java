@@ -182,10 +182,13 @@ public class MultiOutputStream extends FilterOutputStream {
 			// restricted access
 		}
 		
-		public void addBranch(@Nullable OutputStream branch) {
+		@Nonnull
+		public Builder addBranch(@Nullable OutputStream branch) {
 			if(branch != null) {
 				this.branches.add(branch);
 			}
+			
+			return this;
 		}
 		
 		@Nonnull
