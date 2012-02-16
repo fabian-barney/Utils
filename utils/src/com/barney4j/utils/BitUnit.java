@@ -112,17 +112,17 @@ public enum BitUnit {
 	};
 
 
-	static final double C_KIBIT = Math.pow(2, 10);
-	static final double C_MIBIT = Math.pow(2, 20);
-	static final double C_GIBIT = Math.pow(2, 30);
-	static final double C_TIBIT = Math.pow(2, 40);
-	static final double C_PIBIT = Math.pow(2, 50);
+	static final double C_KIBIT = Math.pow(2d, 10d);
+	static final double C_MIBIT = Math.pow(2d, 20d);
+	static final double C_GIBIT = Math.pow(2d, 30d);
+	static final double C_TIBIT = Math.pow(2d, 40d);
+	static final double C_PIBIT = Math.pow(2d, 50d);
 
-	static final double C_KBIT = Math.pow(10, 3);
-	static final double C_MBIT = Math.pow(10, 6);
-	static final double C_GBIT = Math.pow(10, 9);
-	static final double C_TBIT = Math.pow(10, 12);
-	static final double C_PBIT = Math.pow(10, 15);
+	static final double C_KBIT = Math.pow(10d, 3d);
+	static final double C_MBIT = Math.pow(10d, 6d);
+	static final double C_GBIT = Math.pow(10d, 9d);
+	static final double C_TBIT = Math.pow(10d, 12d);
+	static final double C_PBIT = Math.pow(10d, 15d);
 
 
 	private static final double MAX = Double.MAX_VALUE;
