@@ -158,17 +158,17 @@ public enum ByteUnit {
 
 
 
-	static final double C_KIB = Math.pow(2, 10);
-	static final double C_MIB = Math.pow(2, 20);
-	static final double C_GIB = Math.pow(2, 30);
-	static final double C_TIB = Math.pow(2, 40);
-	static final double C_PIB = Math.pow(2, 50);
+	static final double C_KIB = Math.pow(2d, 10d);
+	static final double C_MIB = Math.pow(2d, 20d);
+	static final double C_GIB = Math.pow(2d, 30d);
+	static final double C_TIB = Math.pow(2d, 40d);
+	static final double C_PIB = Math.pow(2d, 50d);
 
-	static final double C_KB = Math.pow(10, 3);
-	static final double C_MB = Math.pow(10, 6);
-	static final double C_GB = Math.pow(10, 9);
-	static final double C_TB = Math.pow(10, 12);
-	static final double C_PB = Math.pow(10, 15);
+	static final double C_KB = Math.pow(10d, 3d);
+	static final double C_MB = Math.pow(10d, 6d);
+	static final double C_GB = Math.pow(10d, 9d);
+	static final double C_TB = Math.pow(10d, 12d);
+	static final double C_PB = Math.pow(10d, 15d);
 
 
 	private static final double MAX = Double.MAX_VALUE;
