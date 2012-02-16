@@ -6,7 +6,6 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.CheckReturnValue;
@@ -47,7 +46,7 @@ public class MultiOutputStream extends FilterOutputStream {
 		this.branches = ImmutableList.copyOf(branches);
 	}
 	
-	protected MultiOutputStream(@Nonnull OutputStream main, @Nonnull Collection<? extends OutputStream> branches) {
+	protected MultiOutputStream(@Nonnull OutputStream main, @Nonnull Iterable<? extends OutputStream> branches) {
 		super(main);
 		this.branches = ImmutableList.copyOf(branches);
 	}
