@@ -1,6 +1,8 @@
 package com.barney4j.utils.io;
 
+import static com.barney4j.utils.base.Throwables.mostImportant;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.propagateIfPossible;
 
 import java.io.FilterOutputStream;
 import java.io.IOException;
@@ -13,7 +15,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 
 /*
@@ -53,6 +54,7 @@ public class MultiOutputStream extends FilterOutputStream {
 
 	@Nonnull
 	@CheckReturnValue
+	@SuppressWarnings("resource")
 	public static OutputStream create(@Nonnull OutputStream main, @Nullable OutputStream branch) {
 		checkNotNull(main);
 		return branch == null ? main : new MultiOutputStream(main, branch);
@@ -155,18 +157,18 @@ public class MultiOutputStream extends FilterOutputStream {
     		super.close();
     	}
     	catch (Throwable t) {
-    		throwable = IOs.mostImportant(throwable, t);
+    		throwable = mostImportant(throwable, t);
     	}
     	
     	try {
     		IOs.close(this.branches);
     	}
     	catch (Throwable t) {
-    		throwable = IOs.mostImportant(throwable, t);
+    		throwable = mostImportant(throwable, t);
     	}
     	
     	if(throwable != null) {
-    		Throwables.propagateIfPossible(throwable, IOException.class);
+    		propagateIfPossible(throwable, IOException.class);
 			throw new RuntimeException("This Exception was unexpected. It occurred during closing resources.", throwable);
     	}
     }
@@ -193,6 +195,7 @@ public class MultiOutputStream extends FilterOutputStream {
 		
 		@Nonnull
 		@CheckReturnValue
+		@SuppressWarnings("resource")
 		public OutputStream build(@Nonnull OutputStream main) {
 			checkNotNull(main);
 			return this.branches.isEmpty() ? main : new MultiOutputStream(main, this.branches);

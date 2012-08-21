@@ -1,5 +1,8 @@
 package com.barney4j.utils.io;
 
+import static com.barney4j.utils.base.Throwables.mostImportant;
+import static com.google.common.base.Throwables.propagateIfPossible;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.util.Arrays;
@@ -8,7 +11,6 @@ import javax.annotation.Nullable;
 import javax.annotation.WillClose;
 
 import com.google.common.annotations.Beta;
-import com.google.common.base.Throwables;
 
 /*
  * Copyright 2012 Fabian Barney
@@ -78,7 +80,7 @@ public final class IOs {
 		}
 		finally {
 			if(throwable != null) {
-				Throwables.propagateIfPossible(throwable, IOException.class);
+				propagateIfPossible(throwable, IOException.class);
 				throw new RuntimeException("This Exception was unexpected. It occurred during closing resources.", throwable);
 			}
 		}
@@ -105,18 +107,11 @@ public final class IOs {
 		}
 		finally {
 			if(throwable != null) {
-				Throwables.propagateIfPossible(throwable, IOException.class);
+				propagateIfPossible(throwable, IOException.class);
 				throw new RuntimeException("This Exception was unexpected. It occurred during closing resources.", throwable);
 			}
 		}
 	}
 	
-	static Throwable mostImportant(Throwable t1, Throwable t2) {
-		if(t1 instanceof Error) {
-			return t1;
-		}
-		
-		return t1 == null || t2 instanceof Error ? t2 : t1;
-	}
 
 }
