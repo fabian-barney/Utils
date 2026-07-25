@@ -50,7 +50,7 @@
     <jacoco.version>0.8.15</jacoco.version>
     <jspecify.version>1.0.0</jspecify.version>
     <errorprone.version>2.50.0</errorprone.version>
-    <nullaway.version>0.13.7</nullaway.version>
+    <nullaway.version>0.13.8</nullaway.version>
   </properties>
   <dependencies>
     <dependency>
