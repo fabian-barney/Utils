@@ -117,7 +117,10 @@ jobs:
               echo "::error::A published GitHub Release already exists for $GITHUB_REF_NAME." >&2
               exit 1
             fi
-            echo "A GitHub Release draft already exists for $GITHUB_REF_NAME."
+            gh release edit "$GITHUB_REF_NAME" \
+              --draft \
+              --title "$GITHUB_REF_NAME" \
+              --notes-file "$notes_file"
           else
             gh release create "$GITHUB_REF_NAME" \
               --verify-tag \
