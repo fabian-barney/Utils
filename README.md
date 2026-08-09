@@ -113,8 +113,8 @@ double bits = ByteUnit.KIB.toBits(4, 16);
 
 ## Release
 
-See `RELEASING.md` for the Maven Central release workflow, required GitHub
-secrets, and rollback expectations.
+See `CHANGELOG.md` for release history and `RELEASING.md` for the Maven Central
+workflow, required GitHub secrets, and rollback expectations.
 
 ## License
 

@@ -6,7 +6,7 @@ on:
       - "v*"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -58,7 +58,10 @@ jobs:
           test -n "$MAVEN_GPG_PASSPHRASE"
 
           printf '%s' "$MAVEN_GPG_PRIVATE_KEY" | gpg --batch --import
-          secret_key_count="$(gpg --batch --with-colons --list-secret-keys | awk -F: '$1 == "sec" { count++ } END { print count + 0 }')"
+          secret_key_count="$(
+            gpg --batch --with-colons --list-secret-keys |
+              awk -F: '$1 == "sec" { count++ } END { print count + 0 }'
+          )"
           if [ "$secret_key_count" -eq 0 ]; then
             echo "::error::MAVEN_GPG_PRIVATE_KEY did not import any secret keys." >&2
             exit 1
@@ -72,7 +75,8 @@ jobs:
           cat > "${HOME}/.m2/settings.xml" <<'EOF'
           <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                        https://maven.apache.org/xsd/settings-1.0.0.xsd">
             <servers>
               <server>
                 <id>central</id>
@@ -83,5 +87,53 @@ jobs:
           </settings>
           EOF
 
+      - name: Create GitHub Release draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          notes_file="$(mktemp)"
+          awk -v version="$version" '
+            /^## / {
+              if (index($0, "## [" version "]") == 1 ||
+                  index($0, "## " version) == 1) {
+                in_release=1
+              } else if (in_release) {
+                exit
+              }
+            }
+            in_release { print }
+          ' CHANGELOG.md > "$notes_file"
+
+          if [[ ! -s "$notes_file" ]]; then
+            echo "::error::No changelog entry found for $GITHUB_REF_NAME." >&2
+            exit 1
+          fi
+
+          existing_draft="$(gh release view "$GITHUB_REF_NAME" --json isDraft --jq .isDraft 2>/dev/null || true)"
+          if [[ -n "$existing_draft" ]]; then
+            if [[ "$existing_draft" != "true" ]]; then
+              echo "::error::A published GitHub Release already exists for $GITHUB_REF_NAME." >&2
+              exit 1
+            fi
+            echo "A GitHub Release draft already exists for $GITHUB_REF_NAME."
+          else
+            gh release create "$GITHUB_REF_NAME" \
+              --verify-tag \
+              --draft \
+              --title "$GITHUB_REF_NAME" \
+              --notes-file "$notes_file"
+          fi
+
       - name: Publish release
-        run: ./mvnw -B -ntp -Prelease -Drevision=${{ steps.version.outputs.version }} -Dscm.tag=v${{ steps.version.outputs.version }} -Dcentral.skipPublishing=false deploy
+        run: >
+          ./mvnw -B -ntp -Prelease
+          -Drevision=${{ steps.version.outputs.version }}
+          -Dscm.tag=v${{ steps.version.outputs.version }}
+          -Dcentral.skipPublishing=false deploy
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "$GITHUB_REF_NAME" --draft=false
