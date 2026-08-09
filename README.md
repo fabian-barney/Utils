@@ -33,7 +33,8 @@ On Windows:
 `verify` runs the library tests plus the shared `crap-java` and
 `cognitive-java` gates.
 
-To isolate only the `crap-java` gate on Unix-like systems:
+To run only the `crap-java` quality gate plugin while still executing the full
+Maven `verify` lifecycle on Unix-like systems:
 
 ```bash
 ./mvnw -B -ntp -P!quality-gates-all,quality-gate-crap verify
@@ -45,7 +46,8 @@ On Windows:
 .\mvnw.cmd -B -ntp -P!quality-gates-all,quality-gate-crap verify
 ```
 
-To isolate only the `cognitive-java` gate on Unix-like systems:
+To run only the `cognitive-java` quality gate plugin while still executing the
+full Maven `verify` lifecycle on Unix-like systems:
 
 ```bash
 ./mvnw -B -ntp -P!quality-gates-all,quality-gate-cognitive verify
