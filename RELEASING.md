@@ -1,7 +1,8 @@
 # Releasing
 
 `utils-java` publishes non-`SNAPSHOT` releases to Maven Central through the
-Central Publisher Portal.
+Central Publisher Portal. `CHANGELOG.md` is the authoritative release-notes
+source used to create and publish the matching GitHub Release.
 
 ## Prerequisites
 
@@ -16,20 +17,27 @@ Before the release workflow can succeed:
 
 Configure these repository secrets:
 
-- `CENTRAL_USERNAME`: Central Publisher Portal user token username
-- `CENTRAL_PASSWORD`: Central Publisher Portal user token password
-- `CENTRAL_GPG_PRIVATE_KEY`: ASCII-armored private key used to sign artifacts
-- `CENTRAL_GPG_PASSPHRASE`: passphrase for the private key
+- `MAVEN_CENTRAL_TOKEN_USERNAME`: Central Publisher Portal user token username
+- `MAVEN_CENTRAL_TOKEN_PASSWORD`: Central Publisher Portal user token password
+- `MAVEN_GPG_PRIVATE_KEY`: ASCII-armored private key used to sign artifacts
+- `MAVEN_GPG_PASSPHRASE`: passphrase for the private key
 
 ## Release Process
 
-1. Make sure `main` contains the release-ready code.
-2. Create an annotated tag using the release version prefixed with `v`, for
-   example `v0.1.0`.
-3. Push the tag to GitHub.
+1. Make sure the release-ready code is merged into `main` and the working tree
+   is clean.
+2. Review the delta from the latest release and update the matching entry in
+   `CHANGELOG.md`. Set `previous_tag` to the actual prior tag and run
+   `git grep -F "$previous_tag"` to scan for stale references.
+3. Create an annotated tag using the release version prefixed with `v`, for
+   example `v0.1.0`, and push the tag to GitHub.
 4. The `Release to Maven Central` workflow derives the Maven version from the
-   tag, runs `./mvnw -Prelease deploy`, signs the artifacts, and publishes them
-   via the Central Publisher Portal.
+   tag, creates a GitHub Release draft from the matching changelog entry, runs
+   `./mvnw -Prelease deploy`, signs the artifacts, and publishes them via the
+   Central Publisher Portal.
+5. After Maven Central publication succeeds, the workflow promotes the GitHub
+   Release draft to a published release. If publication fails, retain the
+   draft and follow the immutable-version rollback policy below.
 
 The project keeps `0.0.1-SNAPSHOT` as the default local development version and
 overrides `revision` during tagged releases.
@@ -45,6 +53,21 @@ You can validate the release profile locally without publishing by running:
 This still requires:
 
 - a usable GPG private key in the local keyring
+
+Before tagging, review `THIRD_PARTY_NOTICES.md` and verify that dependency and
+transitive-license metadata remains accurate. The published runtime JAR does
+not bundle test or build-tool dependencies.
+
+## Publication Targets
+
+Maven Central is the only publication target for this repository. The Gradle
+Plugin Portal and private artifact repositories are not applicable.
+
+## Governance
+
+Release preparation must use a focused branch and pull request. Repository
+administrators should keep required reviews and status checks enabled on
+`main`; release tagging must not be used to bypass those gates.
 
 ## Rollback Expectations
 

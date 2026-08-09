@@ -6,7 +6,7 @@ on:
       - "v*"
 
 permissions:
-  contents: read
+  contents: write
 
 concurrency:
   group: release-${{ github.ref }}
@@ -58,7 +58,10 @@ jobs:
           test -n "$MAVEN_GPG_PASSPHRASE"
 
           printf '%s' "$MAVEN_GPG_PRIVATE_KEY" | gpg --batch --import
-          secret_key_count="$(gpg --batch --with-colons --list-secret-keys | awk -F: '$1 == "sec" { count++ } END { print count + 0 }')"
+          secret_key_count="$(
+            gpg --batch --with-colons --list-secret-keys |
+              awk -F: '$1 == "sec" { count++ } END { print count + 0 }'
+          )"
           if [ "$secret_key_count" -eq 0 ]; then
             echo "::error::MAVEN_GPG_PRIVATE_KEY did not import any secret keys." >&2
             exit 1
@@ -72,7 +75,8 @@ jobs:
           cat > "${HOME}/.m2/settings.xml" <<'EOF'
           <settings xmlns="http://maven.apache.org/SETTINGS/1.0.0"
                     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0 https://maven.apache.org/xsd/settings-1.0.0.xsd">
+                    xsi:schemaLocation="http://maven.apache.org/SETTINGS/1.0.0
+                                        https://maven.apache.org/xsd/settings-1.0.0.xsd">
             <servers>
               <server>
                 <id>central</id>
@@ -83,5 +87,101 @@ jobs:
           </settings>
           EOF
 
+      - name: Create GitHub Release draft
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          version="$RELEASE_VERSION"
+          notes_file="$(mktemp)"
+          awk -v version="$version" '
+            /^## / {
+              if (index($0, "## [" version "]") == 1 ||
+                  index($0, "## " version) == 1) {
+                in_release=1
+              } else if (in_release) {
+                exit
+              }
+            }
+            in_release { print }
+          ' CHANGELOG.md > "$notes_file"
+
+          if [[ ! -s "$notes_file" ]]; then
+            echo "::error::No changelog entry found for $GITHUB_REF_NAME." >&2
+            exit 1
+          fi
+
+          release_error="$(mktemp)"
+          create_error="$(mktemp)"
+          trap 'rm -f "$notes_file" "$release_error" "$create_error"' EXIT
+
+          release_state=""
+          set +e
+          release_state="$(
+            gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${GITHUB_REF_NAME}" \
+              --jq .draft 2>"$release_error"
+          )"
+          release_status=$?
+          set -e
+
+          if [[ "$release_status" -ne 0 ]]; then
+            if grep -Eiq 'HTTP 404|Not Found' "$release_error"; then
+              release_state=""
+            else
+              cat "$release_error" >&2
+              exit "$release_status"
+            fi
+          fi
+
+          refresh_draft() {
+            gh release edit "$GITHUB_REF_NAME" \
+              --draft \
+              --title "$GITHUB_REF_NAME" \
+              --notes-file "$notes_file"
+          }
+
+          if [[ -n "$release_state" ]]; then
+            if [[ "$release_state" != "true" ]]; then
+              echo "::error::A published GitHub Release already exists for $GITHUB_REF_NAME." >&2
+              exit 1
+            fi
+            refresh_draft
+          else
+            set +e
+            gh release create "$GITHUB_REF_NAME" \
+              --verify-tag \
+              --draft \
+              --title "$GITHUB_REF_NAME" \
+              --notes-file "$notes_file" 2>"$create_error"
+            create_status=$?
+            set -e
+
+            if [[ "$create_status" -ne 0 ]]; then
+              set +e
+              release_state="$(
+                gh api "repos/${GITHUB_REPOSITORY}/releases/tags/${GITHUB_REF_NAME}" \
+                  --jq .draft 2>"$release_error"
+              )"
+              release_status=$?
+              set -e
+              if [[ "$release_status" -eq 0 && "$release_state" == "true" ]]; then
+                refresh_draft
+              else
+                cat "$create_error" >&2
+                exit "$create_status"
+              fi
+            fi
+          fi
+
       - name: Publish release
-        run: ./mvnw -B -ntp -Prelease -Drevision=${{ steps.version.outputs.version }} -Dscm.tag=v${{ steps.version.outputs.version }} -Dcentral.skipPublishing=false deploy
+        run: >
+          ./mvnw -B -ntp -Prelease
+          -Drevision=${{ steps.version.outputs.version }}
+          -Dscm.tag=v${{ steps.version.outputs.version }}
+          -Dcentral.skipPublishing=false deploy
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release edit "$GITHUB_REF_NAME" --draft=false
