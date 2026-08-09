@@ -27,7 +27,8 @@ Configure these repository secrets:
 1. Make sure the release-ready code is merged into `main` and the working tree
    is clean.
 2. Review the delta from the latest release and update the matching entry in
-   `CHANGELOG.md`. Scan for stale references with `git grep -F "v<previous>"`.
+   `CHANGELOG.md`. Set `previous_tag` to the actual prior tag and run
+   `git grep -F "$previous_tag"` to scan for stale references.
 3. Create an annotated tag using the release version prefixed with `v`, for
    example `v0.1.0`, and push the tag to GitHub.
 4. The `Release to Maven Central` workflow derives the Maven version from the

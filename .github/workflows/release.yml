@@ -90,9 +90,10 @@ jobs:
       - name: Create GitHub Release draft
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_VERSION: ${{ steps.version.outputs.version }}
         shell: bash
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          version="$RELEASE_VERSION"
           notes_file="$(mktemp)"
           awk -v version="$version" '
             /^## / {
