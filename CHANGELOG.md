@@ -3,6 +3,16 @@
 All notable releases of `utils-java` are documented here. The release workflow
 uses each versioned section as the authoritative GitHub Release notes.
 
+## [0.0.10] - 2026-08-23
+
+### Changed
+
+- updated the JUnit Jupiter test dependency to 6.1.3
+
+### Compatibility
+
+- no public API or runtime behavior changes
+
 ## [0.0.9] - 2026-08-09
 
 ### Changed
