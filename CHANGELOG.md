@@ -9,10 +9,10 @@ uses each versioned section as the authoritative GitHub Release notes.
 
 - clarified that the `quality-gate-*` Maven commands run the full `verify`
   lifecycle
-- upgraded the CRAP quality plugin to `0.6.2` and the cognitive-complexity
-  quality plugin to `0.7.0`
-- upgraded the build-time NullAway analysis tool to `0.14.0`
-- upgraded the GitHub Actions Java setup action to `6.0.0` in CI and release
+- upgraded the CRAP quality plugin to 0.6.2 and the cognitive-complexity
+  quality plugin to 0.7.0
+- upgraded the build-time NullAway analysis tool to 0.14.0
+- upgraded the GitHub Actions Java setup action to 6.0.0 in CI and release
   automation
 
 ### Compatibility
