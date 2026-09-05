@@ -33,7 +33,7 @@
     <revision>0.0.1-SNAPSHOT</revision>
     <scm.tag>HEAD</scm.tag>
     <crap-java.version>0.6.2</crap-java.version>
-    <cognitive-java.version>0.7.0</cognitive-java.version>
+    <cognitive-java.version>0.7.1</cognitive-java.version>
     <maven.compiler.release>21</maven.compiler.release>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
